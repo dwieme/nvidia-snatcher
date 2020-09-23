@@ -1,7 +1,7 @@
 import {Config} from './config';
 
-export function getSleepTime() {
-	return Config.browser.minSleep + Math.floor(Math.random() * (Config.browser.maxSleep - Config.browser.minSleep));
+export function getSleepTime(min = Config.browser.minSleep, max = Config.browser.maxSleep) {
+	return min + Math.floor(Math.random() * (max - min));
 }
 
 export async function delay(ms: number) {

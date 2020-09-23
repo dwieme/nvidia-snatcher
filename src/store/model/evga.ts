@@ -45,6 +45,8 @@ export const Evga: Store = {
 			url: 'https://www.evga.com/products/product.aspx?pn=10G-P5-3885-KR'
 		}
 	],
+	maxSleep: 20000,
+	minSleep: 15000,
 	name: 'evga'
 };
 

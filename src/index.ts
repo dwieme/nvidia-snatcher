@@ -2,6 +2,7 @@ import {Config} from './config';
 import {Logger} from './logger';
 import {Stores} from './store/model';
 import {adBlocker} from './adblocker';
+import {getSleepTime} from './util';
 import puppeteer from 'puppeteer-extra';
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import {tryLookupAndLoop} from './store';
@@ -46,7 +47,7 @@ async function main() {
 			store.setupAction(page);
 		}
 
-		void tryLookupAndLoop(page, store);
+		void tryLookupAndLoop(page, store, getSleepTime(store.minSleep, store.maxSleep));
 	}
 	/* eslint-enable no-await-in-loop */
 }

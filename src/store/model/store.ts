@@ -9,6 +9,7 @@ export interface Link {
 	series: string;
 	brand: string;
 	model: string;
+
 	url: string;
 	cartUrl?: string;
 	openCartAction?: (page: Page) => Promise<string>;
@@ -26,4 +27,6 @@ export interface Store {
 	name: string;
 	setupAction?: (page: Page) => void;
 	customWaitFor?: LoadEvent;
+	minSleep?: number;
+	maxSleep?: number;
 }

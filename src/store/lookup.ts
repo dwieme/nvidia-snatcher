@@ -36,6 +36,14 @@ function filterSeries(series: string) {
 	return Config.store.showOnlySeries.includes(series);
 }
 
+function filterModel(model: string) {
+	if (Config.store.showOnlyModels.length === 0) {
+		return true;
+	}
+
+	return Config.store.showOnlyModels.includes(model);
+}
+
 /**
  * Responsible for looking up information about a each product within
  * a `Store`. It's important that we ignore `no-await-in-loop` here
@@ -51,6 +59,10 @@ async function lookup(page: Page, store: Store) {
 		}
 
 		if (!filterBrand(link.brand)) {
+			continue;
+		}
+
+		if (!filterModel(link.model)) {
 			continue;
 		}
 
@@ -147,7 +159,7 @@ async function lookupPageHasCaptcha(store: Store, page: Page) {
 	return false;
 }
 
-export async function tryLookupAndLoop(page: Page, store: Store) {
+export async function tryLookupAndLoop(page: Page, store: Store, sleepTime: number) {
 	Logger.debug(`[${store.name}] Starting lookup...`);
 	try {
 		if (Config.page.inStockWaitTime && inStock[store.name]) {
@@ -159,7 +171,6 @@ export async function tryLookupAndLoop(page: Page, store: Store) {
 		Logger.error(error);
 	}
 
-	const sleepTime = getSleepTime();
 	Logger.debug(`[${store.name}] Lookup done, next one in ${sleepTime} ms`);
-	setTimeout(tryLookupAndLoop, sleepTime, page, store);
+	setTimeout(tryLookupAndLoop, sleepTime, page, store, sleepTime);
 }
