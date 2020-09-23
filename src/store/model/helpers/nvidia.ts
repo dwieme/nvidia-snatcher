@@ -65,8 +65,11 @@ export function generateSetupAction() {
 			const accessToken = data.access_token;
 
 			Logger.info('[nvidia] you can log into your cart now...');
-			Logger.info(checkoutUrl(drLocale, accessToken));
-			await open(checkoutUrl(drLocale, accessToken));
+			const cartUrl = checkoutUrl(drLocale, accessToken);
+			Logger.info(cartUrl);
+			if (Config.browser.open) {
+				await open(cartUrl);
+			}
 		} catch (error) {
 			Logger.debug(error);
 			Logger.error('✖ [nvidia] cannot generate cart/session token, continuing without, auto-"add to cart" may not work...');
@@ -78,6 +81,7 @@ export function generateOpenCartAction(id: number, nvidiaLocale: string, drLocal
 	return async (page: Page) => {
 		Logger.info(`🚀🚀🚀 [nvidia] ${cardName}, starting auto add to cart... 🚀🚀🚀`);
 		let response: Response | null;
+		let cartUrl: string;
 		try {
 			Logger.info(`🚀🚀🚀 [nvidia] ${cardName}, getting access token... 🚀🚀🚀`);
 			response = await page.goto(nvidiaSessionUrl(nvidiaLocale), {waitUntil: 'networkidle0'});
@@ -92,13 +96,17 @@ export function generateOpenCartAction(id: number, nvidiaLocale: string, drLocal
 			response = await page.goto(addToCartUrl(id, drLocale, accessToken), {waitUntil: 'networkidle0'});
 
 			Logger.info(`🚀🚀🚀 [nvidia] ${cardName}, opening checkout page... 🚀🚀🚀`);
-			Logger.info(checkoutUrl(drLocale, accessToken));
-			await open(checkoutUrl(drLocale, accessToken));
+			cartUrl = checkoutUrl(drLocale, accessToken);
+			Logger.info(cartUrl);
+			await open(cartUrl);
 		} catch (error) {
 			Logger.debug(error);
 			Logger.error(`✖ [nvidia] ${cardName} could not automatically add to cart, opening page`);
-			await open(fallbackCartUrl(nvidiaLocale));
+			cartUrl = fallbackCartUrl(nvidiaLocale);
+			await open(cartUrl);
 		}
+
+		return cartUrl;
 	};
 }
 

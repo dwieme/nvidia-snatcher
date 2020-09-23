@@ -13,6 +13,11 @@ puppeteer.use(adBlocker);
  * Starts the bot.
  */
 async function main() {
+	if (Stores.length === 0) {
+		Logger.error('No stores selected.');
+		return;
+	}
+
 	const args: string[] = [];
 
 	// Skip Chromium Linux Sandbox
