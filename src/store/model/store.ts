@@ -1,4 +1,4 @@
-import {Browser} from 'puppeteer';
+import {Page} from 'puppeteer';
 
 export interface Element {
 	container: string;
@@ -11,7 +11,7 @@ export interface Link {
 	model: string;
 	url: string;
 	cartUrl?: string;
-	openCartAction?: (browser: Browser) => void;
+	openCartAction?: (page: Page) => void;
 	screenshot?: string;
 }
 
@@ -24,5 +24,5 @@ export interface Store {
 	links: Link[];
 	labels: Labels;
 	name: string;
-	setupAction?: (browser: Browser) => void;
+	setupAction?: (page: Page) => void;
 }

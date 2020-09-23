@@ -32,14 +32,19 @@ async function main() {
 		headless: Config.browser.isHeadless
 	});
 
+	/* eslint-disable no-await-in-loop */
 	for (const store of Stores) {
-		Logger.debug(store.links);
+		const page = await browser.newPage();
+		page.setDefaultNavigationTimeout(Config.page.navigationTimeout);
+		await page.setUserAgent(Config.page.userAgent);
+
 		if (store.setupAction !== undefined) {
-			store.setupAction(browser);
+			store.setupAction(page);
 		}
 
-		setTimeout(tryLookupAndLoop, getSleepTime(), browser, store);
+		setTimeout(tryLookupAndLoop, getSleepTime(), page, store);
 	}
+	/* eslint-enable no-await-in-loop */
 }
 
 /**

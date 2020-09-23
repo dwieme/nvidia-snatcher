@@ -1,5 +1,5 @@
-import {Browser, Response} from 'puppeteer';
 import {NvidiaRegionInfo, regionInfos} from '../nvidia';
+import {Page, Response} from 'puppeteer';
 import {Config} from '../../../config';
 import {Link} from '../store';
 import {Logger} from '../../../logger';
@@ -50,10 +50,8 @@ function fallbackCartUrl(nvidiaLocale: string): string {
 }
 
 export function generateSetupAction() {
-	return async (browser: Browser) => {
+	return async (page: Page) => {
 		const {drLocale, nvidiaLocale} = getRegionInfo();
-
-		const page = await browser.newPage();
 
 		Logger.info('[nvidia] creating cart/session token...');
 		let response: Response | null;
@@ -73,14 +71,11 @@ export function generateSetupAction() {
 			Logger.debug(error);
 			Logger.error('✖ [nvidia] cannot generate cart/session token, continuing without, auto-"add to cart" may not work...');
 		}
-
-		await page.close();
 	};
 }
 
 export function generateOpenCartAction(id: number, nvidiaLocale: string, drLocale: string, cardName: string) {
-	return async (browser: Browser) => {
-		const page = await browser.newPage();
+	return async (page: Page) => {
 		Logger.info(`🚀🚀🚀 [nvidia] ${cardName}, starting auto add to cart... 🚀🚀🚀`);
 		let response: Response | null;
 		try {
@@ -104,8 +99,6 @@ export function generateOpenCartAction(id: number, nvidiaLocale: string, drLocal
 			Logger.error(`✖ [nvidia] ${cardName} could not automatically add to cart, opening page`);
 			await open(fallbackCartUrl(nvidiaLocale));
 		}
-
-		await page.close();
 	};
 }
 

@@ -1,6 +1,7 @@
-import {Browser, Page, Response} from 'puppeteer';
 import {Link, Store} from './model';
-import {closePage, delay, getSleepTime} from '../util';
+import {Page, Response} from 'puppeteer';
+import {delay, getSleepTime} from '../util';
+
 import {Config} from '../config';
 import {Logger} from '../logger';
 import {includesLabels} from './includes-labels';
@@ -42,7 +43,7 @@ function filterSeries(series: string) {
  * @param browser Puppeteer browser.
  * @param store Vendor of graphics cards.
  */
-async function lookup(browser: Browser, store: Store) {
+async function lookup(page: Page, store: Store) {
 	/* eslint-disable no-await-in-loop */
 	for (const link of store.links) {
 		if (!filterSeries(link.series)) {
@@ -53,22 +54,16 @@ async function lookup(browser: Browser, store: Store) {
 			continue;
 		}
 
-		const page = await browser.newPage();
-		page.setDefaultNavigationTimeout(Config.page.navigationTimeout);
-		await page.setUserAgent(Config.page.userAgent);
-
 		try {
-			await lookupCard(browser, store, page, link);
+			await lookupCard(page, store, link);
 		} catch (error) {
 			Logger.error(`✖ [${store.name}] ${link.brand} ${link.model} - ${error.message as string}`);
 		}
-
-		await closePage(page);
 	}
 	/* eslint-enable no-await-in-loop */
 }
 
-async function lookupCard(browser: Browser, store: Store, page: Page, link: Link) {
+async function lookupCard(page: Page, store: Store, link: Link) {
 	const response: Response | null = await page.goto(link.url, {waitUntil: 'networkidle0'});
 	const graphicsCard = `${link.brand} ${link.model}`;
 
@@ -94,7 +89,7 @@ async function lookupCard(browser: Browser, store: Store, page: Page, link: Link
 			if (link.openCartAction === undefined) {
 				await open(givenUrl);
 			} else {
-				link.openCartAction(browser);
+				link.openCartAction(page);
 			}
 		}
 
@@ -126,7 +121,7 @@ async function lookupCardInStock(store: Store, page: Page) {
 
 	const stockContent = await page.evaluate(element => element.outerHTML, stockHandle);
 
-	Logger.debug(stockContent);
+	// Logger.debug(stockContent);
 
 	if (includesLabels(stockContent, store.labels.inStock.text)) {
 		return true;
@@ -150,13 +145,13 @@ async function lookupPageHasCaptcha(store: Store, page: Page) {
 	return false;
 }
 
-export async function tryLookupAndLoop(browser: Browser, store: Store) {
+export async function tryLookupAndLoop(page: Page, store: Store) {
 	Logger.debug(`[${store.name}] Starting lookup...`);
 	try {
 		if (Config.page.inStockWaitTime && inStock[store.name]) {
 			Logger.info(`[${store.name}] Has stock, waiting before trying to lookup again...`);
 		} else {
-			await lookup(browser, store);
+			await lookup(page, store);
 		}
 	} catch (error) {
 		Logger.error(error);
@@ -164,5 +159,5 @@ export async function tryLookupAndLoop(browser: Browser, store: Store) {
 
 	const sleepTime = getSleepTime();
 	Logger.debug(`[${store.name}] Lookup done, next one in ${sleepTime} ms`);
-	setTimeout(tryLookupAndLoop, sleepTime, browser, store);
+	setTimeout(tryLookupAndLoop, sleepTime, page, store);
 }
