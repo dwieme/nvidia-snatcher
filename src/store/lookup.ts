@@ -68,7 +68,7 @@ async function lookupCard(page: Page, store: Store, link: Link) {
 	const response: Response | null = await page.goto(link.url, {waitUntil: givenWaitFor});
 	const graphicsCard = `${link.brand} ${link.model}`;
 
-	if (await lookupCardInStock(store, page)) {
+	if (await lookupCardInStock(store, page, graphicsCard)) {
 		Logger.info(`🚀🚀🚀 [${store.name}] ${graphicsCard} IN STOCK 🚀🚀🚀`);
 		Logger.info(link.url);
 		if (Config.page.inStockWaitTime) {
@@ -112,17 +112,18 @@ async function lookupCard(page: Page, store: Store, link: Link) {
 	Logger.info(`✖ [${store.name}] still out of stock: ${graphicsCard}`);
 }
 
-async function lookupCardInStock(store: Store, page: Page) {
+async function lookupCardInStock(store: Store, page: Page, graphicsCard: string) {
 	const stockHandle = await page.$(store.labels.inStock.container);
 
 	const visible = await page.evaluate(element => element && element.offsetWidth > 0 && element.offsetHeight > 0, stockHandle);
 	if (!visible) {
+		Logger.warn(`✖ [${store.name}] ${graphicsCard} not visible`);
 		return false;
 	}
 
 	const stockContent = await page.evaluate(element => element.outerHTML, stockHandle);
 
-	// Logger.debug(stockContent);
+	Logger.debug(stockContent);
 
 	if (includesLabels(stockContent, store.labels.inStock.text)) {
 		return true;
